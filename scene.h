@@ -10,6 +10,7 @@ struct scene_object
     int x;
     int y;
     char texture[1000];
+    int is_landed;
 };
 
 struct scene
@@ -17,6 +18,8 @@ struct scene
    struct scene_object objects[1000];
    int object_count;
 };
+
+void scene_object_rotate(struct scene_object *object);
 
 struct scene scene_create(void);
 

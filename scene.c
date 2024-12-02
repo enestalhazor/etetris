@@ -43,6 +43,7 @@ struct scene_object scene_create_object(int id, int width, int height)
     object.color = 0;
     object.x = 0;
     object.y = 0;
+    object.is_landed = 0;
 
     return object;
 }
@@ -66,3 +67,4 @@ void scene_object_print_info(struct scene_object object)
     printf("color = %d\n", object.color);
 }
 
+void scene_object_rotate(struct scene_object *object)
