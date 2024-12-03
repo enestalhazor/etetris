@@ -138,8 +138,8 @@ int main(void)
     scene_add_object(&scene, right_wall);
 
     struct scene_object a = tetromino_create(4, 't');
-    a.x = 21;
-    a.y = 0;
+    a.x = 20;
+    a.y = 5;
     scene_add_object(&scene, a);
 
     

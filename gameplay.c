@@ -5,8 +5,20 @@
 #include "physics_engine.h"
 #include "linked_list.h"
 
+int gameplay_time = 0;
+
 struct node *queue;
 pthread_mutex_t queue_mutex;
+
+static void set_pixel(char *matrix, int x, int y, char c, int resolution_x, int resolution_y)
+{
+    if (x >= resolution_x || x < 0 || y >= resolution_y || y < 0)
+    {
+        return;
+    }
+
+    matrix[y * resolution_x + x] = c;
+}
 
 void *gameplay_input(void *p)
 {
@@ -56,21 +68,25 @@ static void add_new_tetromino(struct scene *scene)
     scene_add_object(scene, o);
 }
 
-void gameplay_rule(struct scene *scene)
+void gameplay_rule(struct scene *scene, int res_x, int res_y)
 {
+    gameplay_time++;
     pthread_mutex_lock(&scene->mutex);
-    for (int i = 0; i < scene->object_count; i++)
+    if (gameplay_time % 6 == 0)
     {
-        if (scene->objects[i].id < 1000 && scene->objects[i].is_landed == 0)
+        for (int i = 0; i < scene->object_count; i++)
         {
-            if (physics_is_valid(&scene->objects[i], 'd', scene))
+            if (scene->objects[i].id < 1000 && scene->objects[i].is_landed == 0)
             {
-                scene->objects[i].y++;
-            }
-            else
-            {
-                scene->objects[i].is_landed = 1;
-                add_new_tetromino(scene);
+                if (physics_is_valid(scene->objects[i].id, 'd', scene, res_x, res_y))
+                {
+                    scene->objects[i].y++;
+                }
+                else
+                {
+                    scene->objects[i].is_landed = 1;
+                    add_new_tetromino(scene);
+                }
             }
         }
     }
@@ -93,7 +109,7 @@ void gameplay_rule(struct scene *scene)
         switch (c)
         {
         case 'a':
-            if (scene->objects[flying_tetromino].is_landed == 0 && physics_is_valid(&scene->objects[flying_tetromino], 'l', scene))
+            if (scene->objects[flying_tetromino].is_landed == 0 && physics_is_valid(scene->objects[flying_tetromino].id, 'l', scene, res_x, res_y))
             {
                 scene->objects[flying_tetromino].x--;
             }
@@ -101,7 +117,7 @@ void gameplay_rule(struct scene *scene)
             break;
 
         case 'd':
-            if (scene->objects[flying_tetromino].is_landed == 0 && physics_is_valid(&scene->objects[flying_tetromino], 'r', scene))
+            if (scene->objects[flying_tetromino].is_landed == 0 && physics_is_valid(scene->objects[flying_tetromino].id, 'r', scene, res_x, res_y))
             {
                 scene->objects[flying_tetromino].x++;
             }

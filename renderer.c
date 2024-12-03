@@ -152,9 +152,9 @@ void *renderer_start(void *parameters)
 
         printf("%d", frame_count);
 
-        p->work(scene);
+        p->work(scene, resolution_x, resolution_y);
         
         // we wait before rendering the next frame
-        usleep(1000 * (1000 / 10));
+        usleep(1000 * (1000 / 30));
     }
 }
