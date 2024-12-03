@@ -1,12 +1,9 @@
 #include <stdio.h>
 #include "renderer.h"
 #include <unistd.h>
-#include "enes_util.h"
 #include <string.h>
 #include <stdlib.h>
-#include "physics_engine.h"
-#include "linked_list.h"
-#include "tetromino.h"
+#include "enes_util.h"
 
 #define ESC "\x1b"
 
@@ -101,7 +98,7 @@ void cursor_top_left()
     printf(ESC "[H");
 }
 
-void draw_object_on_matrix(char *matrix, char *color_matrix, struct scene_object object, int resolution_x, int resolution_y)
+void draw_object_on_matrix(char *matrix, char *color_matrix, const struct scene_object object, int resolution_x, int resolution_y)
 {
     for (int h = 0; h < object.height; h++)
     {
@@ -130,7 +127,6 @@ void *renderer_start(void *parameters)
 
     // create matrix
     char *matrix = (char *)malloc(resolution_y * resolution_x);
-    p->matrix = matrix;
     char *color_matrix = (char *)malloc(resolution_y * resolution_x);
 
     while (1)
@@ -138,11 +134,13 @@ void *renderer_start(void *parameters)
         // clear the matrix before filling the matrix with object.
         clear_matrix(matrix, resolution_x, resolution_y);
         // for each object in the scene draw matrix
+        pthread_mutex_lock(&scene->mutex);
         for (int i = 0; i < scene->object_count; i++)
         {
-            struct scene_object object = scene->objects[i];
+            const struct scene_object object = scene->objects[i];
             draw_object_on_matrix(matrix, color_matrix, object, resolution_x, resolution_y);
         }
+        pthread_mutex_unlock(&scene->mutex);
 
         // Put the curser in home position (0, 0)
         cursor_top_left();
@@ -154,113 +152,9 @@ void *renderer_start(void *parameters)
 
         printf("%d", frame_count);
 
-        if (frame_count % 3 == 0)
-        {
-
-            for (int i = 0; i < scene->object_count; i++)
-            {
-                if (scene->objects[i].id < 1000 && scene->objects[i].is_landed == 0)
-                {
-                    if (physics_is_valid(&scene->objects[i], 'd', matrix, resolution_x, resolution_y))
-                    {
-                        scene->objects[i].y++;
-                    }
-                    else
-                    {
-                        scene->objects[i].is_landed = 1;
-                        char c = 0;
-                        int r = get_random_number(0, 6);
-
-                        switch (r)
-                        {
-                        case 0:
-
-                            c = 't';
-
-                            break;
-
-                        case 1:
-
-                            c = 's';
-
-                            break;
-
-                        case 2:
-
-                            c = 'z';
-
-                            break;
-
-                        case 3:
-
-                            c = 'i';
-
-                            break;
-
-                        case 4:
-
-                            c = 'l';
-
-                            break;
-
-                        case 5:
-
-                            c = 'o';
-
-                            break;
-
-                        case 6:
-
-                            c = 'j';
-
-                            break;
-
-                        default:
-                            break;
-                        }
-                        struct scene_object o = tetromino_create(get_random_number(0, 1000), c);
-                        o.x = 20;
-                        o.y = 0;
-                        scene_add_object(scene, o);
-                    }
-                }
-            }
-        }
-
-        pthread_mutex_lock(&p->m);
-
-        int c = shift(&p->queue);
-
-        pthread_mutex_unlock(&p->m);
-        int flying_tetromino = -1;
-
-        for (int i = 0; i < scene->object_count; i++)
-        {
-            if (scene->objects[i].is_landed == 0)
-            {
-                flying_tetromino = i;
-            }
-        }
-        switch (c)
-        {
-        case 'a':
-            if (scene->objects[flying_tetromino].is_landed == 0 && physics_is_valid(&scene->objects[flying_tetromino], 'l', matrix, resolution_x, resolution_y))
-            {
-                scene->objects[flying_tetromino].x--;
-            }
-
-            break;
-
-        case 'd':
-            if (scene->objects[flying_tetromino].is_landed == 0 && physics_is_valid(&scene->objects[flying_tetromino], 'r', matrix, resolution_x, resolution_y))
-            {
-                scene->objects[flying_tetromino].x++;
-            }
-
-            break;
-        }
-
+        p->work(scene);
+        
         // we wait before rendering the next frame
-        usleep(1000 * (1000 / 30));
+        usleep(1000 * (1000 / 10));
     }
 }

@@ -1,5 +1,6 @@
 #ifndef SCENE
 #define SCENE
+#include <pthread.h>
 
 struct scene_object
 {
@@ -17,9 +18,9 @@ struct scene
 {
    struct scene_object objects[1000];
    int object_count;
+   pthread_mutex_t mutex;
 };
 
-void scene_object_rotate(struct scene_object *object);
 
 struct scene scene_create(void);
 

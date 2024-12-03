@@ -9,15 +9,10 @@ struct renderer_parameters
     int resolution_x;
     int resolution_y;
     struct scene *scene;
-    char *matrix;
-    struct node *queue;
-    pthread_mutex_t m;
+
+    void (* work)(struct scene *scene);
 };
 
 void *renderer_start(void *parameters);
-
-
-
-
 
 #endif

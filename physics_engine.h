@@ -2,6 +2,6 @@
 #define PHYSICS_ENGINE
 #include "scene.h"
 
-int physics_is_valid(struct scene_object *object, char direction, const char *matrix, int resolution_x, int resolution_y);
+int physics_is_valid(const struct scene_object *object, char direction, const struct scene *scene);
 
 #endif

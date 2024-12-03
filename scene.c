@@ -7,6 +7,7 @@ struct scene scene_create(void)
     struct scene scene;
     scene.object_count = 0;
     memset(scene.objects, 0, sizeof(struct scene_object) * 100);
+    pthread_mutex_init(&scene.mutex, NULL);
     return scene;
 }
 
@@ -67,4 +68,3 @@ void scene_object_print_info(struct scene_object object)
     printf("color = %d\n", object.color);
 }
 
-void scene_object_rotate(struct scene_object *object)

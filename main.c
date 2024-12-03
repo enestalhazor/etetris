@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <termios.h>
 #include "enes_util.h"
+#include "gameplay.h"
 
 static int terminal_descriptor = -1;
 static struct termios terminal_original;
@@ -120,9 +121,8 @@ int main(void)
     parameters.resolution_x = 40;
     parameters.resolution_y = 40;
     parameters.scene = &scene;
-    parameters.queue = NULL;
+    parameters.work = &gameplay_rule;
 
-    pthread_t t1;
 
     struct scene_object ground = scene_create_object(1000, parameters.resolution_x, 2);
     struct scene_object left_wall = scene_create_object(1001, 2, parameters.resolution_y - 2);
@@ -142,16 +142,16 @@ int main(void)
     a.y = 0;
     scene_add_object(&scene, a);
 
+    
+    pthread_t t1;
     pthread_create(&t1, NULL, &renderer_start, &parameters);
-    while (1)
-    {
-        char c = fgetc(stdin);
-        pthread_mutex_lock(&parameters.m);
-        push(&parameters.queue, c);
-        pthread_mutex_unlock(&parameters.m);
-    }
+
+    pthread_t t2;
+    pthread_create(&t2, NULL, &gameplay_input, NULL);
 
     pthread_join(t1, NULL);
+
+
 
     return 0;
 }
