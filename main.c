@@ -36,7 +36,7 @@ static void restore(void)
     }
 }
 
-void *setup_stdin()
+static void *setup_stdin()
 {
     if (terminal_descriptor != -1)
     {

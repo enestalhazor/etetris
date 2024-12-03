@@ -8,7 +8,7 @@
 #define ESC "\x1b"
 
 // changes pixel(x, y) value to c in matrix
-void set_pixel(char *matrix, int x, int y, char c, int resolution_x, int resolution_y)
+static void set_pixel(char *matrix, int x, int y, char c, int resolution_x, int resolution_y)
 {
     if (x >= resolution_x || x < 0 || y >= resolution_y || y < 0)
     {
@@ -18,14 +18,14 @@ void set_pixel(char *matrix, int x, int y, char c, int resolution_x, int resolut
     matrix[y * resolution_x + x] = c;
 }
 
-char get_pixel(const char *matrix, int x, int y, int resolution_x, int resolution_y)
+static char get_pixel(const char *matrix, int x, int y, int resolution_x, int resolution_y)
 {
     return matrix[y * resolution_x + x];
 }
 
 int frame_count = 0;
 
-void print_matrix(const char *matrix, const char *color_matrix, int resolution_x, int resolution_y)
+static void print_matrix(const char *matrix, const char *color_matrix, int resolution_x, int resolution_y)
 {
     for (int i = 0; i < resolution_y; i++)
     {
@@ -93,12 +93,12 @@ void print_matrix(const char *matrix, const char *color_matrix, int resolution_x
     }
 }
 
-void cursor_top_left()
+static void cursor_top_left()
 {
     printf(ESC "[H");
 }
 
-void draw_object_on_matrix(char *matrix, char *color_matrix, const struct scene_object object, int resolution_x, int resolution_y)
+static void draw_object_on_matrix(char *matrix, char *color_matrix, const struct scene_object object, int resolution_x, int resolution_y)
 {
     for (int h = 0; h < object.height; h++)
     {
@@ -113,7 +113,7 @@ void draw_object_on_matrix(char *matrix, char *color_matrix, const struct scene_
     }
 }
 
-void clear_matrix(char *matrix, int resolution_x, int resolution_y)
+static void clear_matrix(char *matrix, int resolution_x, int resolution_y)
 {
     memset(matrix, ' ', resolution_y * resolution_x);
 }
