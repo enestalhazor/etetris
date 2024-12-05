@@ -27,39 +27,28 @@ static void set_pixel(char *matrix, int x, int y, char c, int resolution_x, int 
 
 static int check_score(struct scene *scene, int res_x, int res_y)
 {
+    struct scene_object *pile = scene_get_object(scene, 1003);
     int total_score = 0;
-    char matrix[100000];
-    memset(matrix, ' ', 100000);
 
-    for (int i = 0; i < scene->object_count; i++)
+    for (int h = 0; h < pile->height; h++)
     {
-        struct scene_object o = scene->objects[i];
-        for (int h = 0; h < o.height; h++)
+        int full = 1;
+        for (int w = 0; w < pile->width; w++)
         {
-            for (int w = 0; w < o.width; w++)
+            if (get_pixel(pile->texture, w, h, pile->width, pile->height) != '#')
             {
-                if (get_pixel(o.texture, w, h, o.width, o.height) != ' ')
-                {
-                    set_pixel(matrix, o.x + w, o.y + h, get_pixel(o.texture, w, h, o.width, o.height), res_x, res_y);
-                }
-            }
-        }
-    }
-
-    for (int j = 0; j < res_y - 2; j++)
-    {
-        int score = 1;
-        for (int i = 0; i < res_x; i++)
-        {
-            if (get_pixel(matrix, i, j, res_x, res_y) != '#')
-            {
-                score = 0;
+                full = 0;
                 break;
             }
         }
-        if (score)
+        if (full)
         {
             total_score = total_score + 10;
+            char copy[10000] = {0};
+            memcpy(copy, pile->texture, pile->width * pile->height);
+
+            memset(pile->texture, ' ', pile->width);
+            memcpy(pile->texture + pile->width, copy, h * pile->width);
         }
     }
     return total_score;
@@ -76,7 +65,7 @@ void *gameplay_input(void *p)
     }
 }
 
-static void add_new_tetromino(struct scene *scene)
+void gameplay_spawn_tetromino(struct scene *scene)
 {
     char c = 0;
     int r = get_random_number(0, 6);
@@ -108,7 +97,7 @@ static void add_new_tetromino(struct scene *scene)
         break;
     }
     struct scene_object o = tetromino_create(get_random_number(0, 1000), c);
-    o.x = 12;
+    o.x = scene->res_x / 2 - 2;
     o.y = 0;
     scene_add_object(scene, o);
 }
@@ -117,21 +106,42 @@ void gameplay_rule(struct scene *scene, int res_x, int res_y)
 {
     gameplay_time++;
     pthread_mutex_lock(&scene->mutex);
-    if (gameplay_time % 6 == 0)
+    if (gameplay_time % 10 == 0)
     {
         for (int i = 0; i < scene->object_count; i++)
         {
-            if (scene->objects[i].id < 1000 && scene->objects[i].is_landed == 0)
+            struct scene_object *obj = &scene->objects[i];
+            if (obj->id < 1000 && obj->is_landed == 0)
             {
-                if (physics_is_valid(scene->objects[i].id, 'd', scene, res_x, res_y))
+                if (physics_is_valid(obj->id, 'd', scene, res_x, res_y))
                 {
-                    scene->objects[i].y++;
+                    obj->y++;
                 }
                 else
                 {
-                    scene->objects[i].is_landed = 1;
+                    obj->is_landed = 1;
+                    struct scene_object *pile = scene_get_object(scene, 1003);
+
+                    for (int h = 0; h < obj->height; h++)
+                    {
+                        for (int w = 0; w < obj->width; w++)
+                        {
+                            if (get_pixel(obj->texture, w, h, obj->width, obj->height) != ' ')
+                            {
+                                set_pixel(pile->texture, obj->x - 2 + w, obj->y - 2 + h, get_pixel(obj->texture, w, h, obj->width, obj->height), pile->width, pile->height);
+                                if ((obj->y - 2 + h) == 0)
+                                {
+                                    scene->game_over = 1;
+                                    pthread_mutex_unlock(&scene->mutex);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
                     scene->score = scene->score + check_score(scene, res_x, res_y);
-                    add_new_tetromino(scene);
+                    scene_remove_object(scene, obj->id);
+                    gameplay_spawn_tetromino(scene);
                 }
             }
         }
@@ -151,6 +161,7 @@ void gameplay_rule(struct scene *scene, int res_x, int res_y)
                 flying_tetromino = i;
             }
         }
+
 
         switch (c)
         {

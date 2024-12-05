@@ -1,6 +1,7 @@
 #ifndef SCENE
 #define SCENE
 #include <pthread.h>
+#include "renderer.h"
 
 struct scene_object
 {
@@ -22,6 +23,9 @@ struct scene
    int object_count;
    int score;
    pthread_mutex_t mutex;
+   int game_over;
+    int res_x;
+    int res_y;
 };
 
 
@@ -30,6 +34,8 @@ struct scene scene_create(void);
 void scene_add_object(struct scene *scene, struct scene_object object);
 
 void scene_remove_object(struct scene *scene, int id);
+
+struct scene_object *scene_get_object(struct scene *scene, int id);
 
 struct scene_object scene_create_object(int id, int width, int height);
 

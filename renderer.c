@@ -135,6 +135,12 @@ void *renderer_start(void *parameters)
         clear_matrix(matrix, resolution_x, resolution_y);
         // for each object in the scene draw matrix
         pthread_mutex_lock(&scene->mutex);
+        if (scene->game_over)
+        {
+
+            printf("\n\nGame over: %d\n", scene->score);
+            return NULL;
+        }
         for (int i = 0; i < scene->object_count; i++)
         {
             const struct scene_object object = scene->objects[i];
@@ -150,10 +156,10 @@ void *renderer_start(void *parameters)
 
         frame_count++;
 
-        printf("frame count= %d score= %d", frame_count, scene->score);
+        printf("score= %d", scene->score);
 
         p->work(scene, resolution_x, resolution_y);
-        
+
         // we wait before rendering the next frame
         usleep(1000 * (1000 / 30));
     }

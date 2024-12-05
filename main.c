@@ -108,6 +108,7 @@ static void *setup_stdin()
      * set and which not, because there isn't much we can do about it. */
     tcsetattr(terminal_descriptor, TCSANOW, &terminal_settings);
 
+    printf(ESCAPE "c");
     fprintf(stdout, ESCAPE "[?25l");
     fflush(stdout);
     signal(SIGINT, handle_sigint);
@@ -118,10 +119,13 @@ int main(void)
     setup_stdin();
     struct scene scene = scene_create();
     struct renderer_parameters parameters;
-    parameters.resolution_x = 20;
+    parameters.resolution_x = 18;
     parameters.resolution_y = 20;
     parameters.scene = &scene;
     parameters.work = &gameplay_rule;
+    scene.res_x = parameters.resolution_x;
+    scene.res_y = parameters.resolution_y;
+
 
     struct scene_object ground = scene_create_object(1000, parameters.resolution_x, 2);
     struct scene_object left_wall = scene_create_object(1001, 2, parameters.resolution_y - 2);
@@ -136,26 +140,13 @@ int main(void)
     scene_add_object(&scene, left_wall);
     scene_add_object(&scene, right_wall);
 
-    struct scene_object a = tetromino_create(4, 'i');
-    tetromino_rotate(&a);
-    a.x = 2;
-    a.y = parameters.resolution_y - 4;
-    a.is_landed = 1;
-    scene_add_object(&scene, a);
+    struct scene_object pile = scene_create_object(1003, parameters.resolution_x - 4, parameters.resolution_y - 4);
+    pile.x = 2;
+    pile.y = 2;
+    pile.color = 3;
+    scene_add_object(&scene, pile);
 
-    struct scene_object b = a;
-    b.x = 6;
-    scene_add_object(&scene, b);
-
-    struct scene_object c = a;
-    c.x = 10;
-    scene_add_object(&scene, c);
-
-    struct scene_object d = tetromino_create(4, 'o');
-    d.x = 8;
-    d.y = 2;
-    scene_add_object(&scene, d);
-
+    gameplay_spawn_tetromino(&scene);
 
     pthread_t t1;
     pthread_create(&t1, NULL, &renderer_start, &parameters);

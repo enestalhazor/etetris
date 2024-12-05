@@ -9,7 +9,9 @@ struct scene scene_create(void)
     scene.object_count = 0;
     memset(scene.objects, 0, sizeof(struct scene_object) * 100);
     pthread_mutex_init(&scene.mutex, NULL);
+    scene.game_over = 0;
     return scene;
+    
 }
 
 void scene_add_object(struct scene *scene, struct scene_object object)
@@ -36,6 +38,21 @@ void scene_remove_object(struct scene *scene, int id)
     scene->object_count--;
 }
 
+struct scene_object *scene_get_object(struct scene *scene, int id)
+{
+    for(int i = 0; i < scene->object_count; i++)
+    {
+        struct scene_object o = scene->objects[i];
+
+        if(scene->objects[i].id == id)
+        {
+            return &scene->objects[i];
+        }
+        
+    }
+    return NULL;
+}
+
 struct scene_object scene_create_object(int id, int width, int height)
 {
     struct scene_object object;
@@ -46,6 +63,7 @@ struct scene_object scene_create_object(int id, int width, int height)
     object.x = 0;
     object.y = 0;
     object.is_landed = 0;
+    memset(object.texture, ' ', width * height);
 
     return object;
 }
