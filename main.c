@@ -118,11 +118,10 @@ int main(void)
     setup_stdin();
     struct scene scene = scene_create();
     struct renderer_parameters parameters;
-    parameters.resolution_x = 40;
-    parameters.resolution_y = 40;
+    parameters.resolution_x = 20;
+    parameters.resolution_y = 20;
     parameters.scene = &scene;
     parameters.work = &gameplay_rule;
-
 
     struct scene_object ground = scene_create_object(1000, parameters.resolution_x, 2);
     struct scene_object left_wall = scene_create_object(1001, 2, parameters.resolution_y - 2);
@@ -137,12 +136,27 @@ int main(void)
     scene_add_object(&scene, left_wall);
     scene_add_object(&scene, right_wall);
 
-    struct scene_object a = tetromino_create(4, 't');
-    a.x = 20;
-    a.y = 5;
+    struct scene_object a = tetromino_create(4, 'i');
+    tetromino_rotate(&a);
+    a.x = 2;
+    a.y = parameters.resolution_y - 4;
+    a.is_landed = 1;
     scene_add_object(&scene, a);
 
-    
+    struct scene_object b = a;
+    b.x = 6;
+    scene_add_object(&scene, b);
+
+    struct scene_object c = a;
+    c.x = 10;
+    scene_add_object(&scene, c);
+
+    struct scene_object d = tetromino_create(4, 'o');
+    d.x = 8;
+    d.y = 2;
+    scene_add_object(&scene, d);
+
+
     pthread_t t1;
     pthread_create(&t1, NULL, &renderer_start, &parameters);
 
@@ -150,8 +164,6 @@ int main(void)
     pthread_create(&t2, NULL, &gameplay_input, NULL);
 
     pthread_join(t1, NULL);
-
-
 
     return 0;
 }

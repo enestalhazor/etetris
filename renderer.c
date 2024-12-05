@@ -150,7 +150,7 @@ void *renderer_start(void *parameters)
 
         frame_count++;
 
-        printf("%d", frame_count);
+        printf("frame count= %d score= %d", frame_count, scene->score);
 
         p->work(scene, resolution_x, resolution_y);
         

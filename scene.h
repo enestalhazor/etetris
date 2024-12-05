@@ -12,12 +12,15 @@ struct scene_object
     int y;
     char texture[1000];
     int is_landed;
+    int rotation;
+    char tetromino_type;
 };
 
 struct scene
 {
    struct scene_object objects[1000];
    int object_count;
+   int score;
    pthread_mutex_t mutex;
 };
 

@@ -5,6 +5,7 @@
 struct scene scene_create(void)
 {
     struct scene scene;
+    scene.score = 0;
     scene.object_count = 0;
     memset(scene.objects, 0, sizeof(struct scene_object) * 100);
     pthread_mutex_init(&scene.mutex, NULL);

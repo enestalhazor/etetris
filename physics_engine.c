@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "physics_engine.h"
 #include <string.h>
+#include "tetromino.h"
 
 
 static char get_pixel(const char *matrix, int x, int y, int resolution_x, int resolution_y)
@@ -44,6 +45,11 @@ int physics_is_valid(int id, char direction, const struct scene *scene, int res_
     case 'r':
         object->x++;
         break;
+
+    case 'o':
+    tetromino_rotate(object);
+    break;
+
     default:
         break;
     }
@@ -58,6 +64,12 @@ int physics_is_valid(int id, char direction, const struct scene *scene, int res_
         {
             for (int w = 0; w < o.width; w++)
             {
+                if(get_pixel(o.texture, w, h, o.width, o.height) == ' ')
+                {
+                    continue;
+                }
+
+
                 if (get_pixel(matrix, o.x + w, o.y + h, res_x, res_y) == ' ')
                 {
                     set_pixel(matrix, o.x + w, o.y + h, get_pixel(o.texture, w, h, o.width, o.height), res_x, res_y);
