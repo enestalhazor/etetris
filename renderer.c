@@ -25,7 +25,7 @@ static char get_pixel(const char *matrix, int x, int y, int resolution_x, int re
 
 int frame_count = 0;
 
-static void print_matrix(const char *matrix, const char *color_matrix, int resolution_x, int resolution_y)
+static void print_matrix(const char *matrix, const char *fcolor_matrix, const char *bcolor_matrix, int resolution_x, int resolution_y)
 {
     for (int i = 0; i < resolution_y; i++)
     {
@@ -34,52 +34,63 @@ static void print_matrix(const char *matrix, const char *color_matrix, int resol
             char c = get_pixel(matrix, j, i, resolution_x, resolution_y);
             if (c != ' ')
             {
-                switch (get_pixel(color_matrix, j, i, resolution_x, resolution_y))
+                switch (get_pixel(fcolor_matrix, j, i, resolution_x, resolution_y))
                 {
                 case 0:
-                    printf(ESC "[48;2;255;255;255m");
                     printf(ESC "[38;2;255;255;255m");
                     break;
+                case 1:
+                    printf(ESC "[38;2;252;123;3m");
+                    break;
+                case 2:
+                    printf(ESC "[38;2;252;244;3m");
+                    break;
+                case 3:
+                    printf(ESC "[38;2;3;252;44m");
+                    break;
+                case 4:
+                    printf(ESC "[38;2;3;132;252m");
+                    break;
+                case 5:
+                    printf(ESC "[38;2;132;3;252m");
+                    break;
+                case 6:
+                    printf(ESC "[38;2;252;3;3m");
+                    break;
+                case 7:
+                    printf(ESC "[38;2;3;252;235m");
+                    break;
 
+                default:
+                    break;
+                }
+
+                switch (get_pixel(bcolor_matrix, j, i, resolution_x, resolution_y))
+                {
+
+                case 0:
+                    printf(ESC "[48;2;255;255;255m");
+                    break;
                 case 1:
                     printf(ESC "[48;2;252;123;3m");
-                    printf(ESC "[38;2;252;123;3m");
-
                     break;
                 case 2:
                     printf(ESC "[48;2;252;244;3m");
-                    printf(ESC "[38;2;252;244;3m");
-
                     break;
-
                 case 3:
                     printf(ESC "[48;2;3;252;44m");
-                    printf(ESC "[38;2;3;252;44m");
-
                     break;
-
                 case 4:
                     printf(ESC "[48;2;3;132;252m");
-                    printf(ESC "[38;2;3;132;252m");
-
                     break;
-
                 case 5:
                     printf(ESC "[48;2;132;3;252m");
-                    printf(ESC "[38;2;132;3;252m");
-
                     break;
-
                 case 6:
                     printf(ESC "[48;2;252;3;3m");
-                    printf(ESC "[38;2;252;3;3m");
-
                     break;
-
                 case 7:
                     printf(ESC "[48;2;3;252;235m");
-                    printf(ESC "[38;2;3;252;235m");
-
                     break;
 
                 default:
@@ -98,7 +109,7 @@ static void cursor_top_left()
     printf(ESC "[H");
 }
 
-static void draw_object_on_matrix(char *matrix, char *color_matrix, const struct scene_object object, int resolution_x, int resolution_y)
+static void draw_object_on_matrix(char *matrix, char *fcolor_matrix, char *bcolor_matrix, const struct scene_object object, int resolution_x, int resolution_y)
 {
     for (int h = 0; h < object.height; h++)
     {
@@ -107,7 +118,16 @@ static void draw_object_on_matrix(char *matrix, char *color_matrix, const struct
             if (get_pixel(matrix, object.x + w, object.y + h, resolution_x, resolution_y) == ' ')
             {
                 set_pixel(matrix, object.x + w, object.y + h, get_pixel(object.texture, w, h, object.width, object.height), resolution_x, resolution_y);
-                set_pixel(color_matrix, object.x + w, object.y + h, object.color, resolution_x, resolution_y);
+                set_pixel(fcolor_matrix, object.x + w, object.y + h, object.color, resolution_x, resolution_y);
+
+                if (object.is_text)
+                {
+                    set_pixel(bcolor_matrix, object.x + w, object.y + h, -1, resolution_x, resolution_y);
+                }
+                else
+                {
+                    set_pixel(bcolor_matrix, object.x + w, object.y + h, object.color, resolution_x, resolution_y);
+                }
             }
         }
     }
@@ -127,7 +147,8 @@ void *renderer_start(void *parameters)
 
     // create matrix
     char *matrix = (char *)malloc(resolution_y * resolution_x);
-    char *color_matrix = (char *)malloc(resolution_y * resolution_x);
+    char *fcolor_matrix = (char *)malloc(resolution_y * resolution_x);
+    char *bcolor_matrix = (char *)malloc(resolution_y * resolution_x);
 
     while (1)
     {
@@ -137,14 +158,13 @@ void *renderer_start(void *parameters)
         pthread_mutex_lock(&scene->mutex);
         if (scene->game_over)
         {
-
-            printf("\n\nGame over: %d\n", scene->score);
-            return NULL;
+            //printf("\n\nGame over: %d\n", scene->score);
+            //return NULL;
         }
         for (int i = 0; i < scene->object_count; i++)
         {
             const struct scene_object object = scene->objects[i];
-            draw_object_on_matrix(matrix, color_matrix, object, resolution_x, resolution_y);
+            draw_object_on_matrix(matrix, fcolor_matrix, bcolor_matrix, object, resolution_x, resolution_y);
         }
         pthread_mutex_unlock(&scene->mutex);
 
@@ -152,13 +172,11 @@ void *renderer_start(void *parameters)
         cursor_top_left();
 
         // print the matrix on the screen
-        print_matrix(matrix, color_matrix, resolution_x, resolution_y);
+        print_matrix(matrix, fcolor_matrix, bcolor_matrix, resolution_x, resolution_y);
 
         frame_count++;
 
-        printf("score= %d", scene->score);
-
-        p->work(scene, resolution_x, resolution_y);
+        p->work(scene);
 
         // we wait before rendering the next frame
         usleep(1000 * (1000 / 30));

@@ -15,19 +15,20 @@ struct scene_object
     int is_landed;
     int rotation;
     char tetromino_type;
+    int is_text;
 };
 
 struct scene
 {
-   struct scene_object objects[1000];
-   int object_count;
-   int score;
-   pthread_mutex_t mutex;
-   int game_over;
+    struct scene_object objects[1000];
+    int object_count;
+    int score;
+    pthread_mutex_t mutex;
+    int game_over;
     int res_x;
     int res_y;
+    int chamber_width;
 };
-
 
 struct scene scene_create(void);
 
@@ -42,8 +43,5 @@ struct scene_object scene_create_object(int id, int width, int height);
 void scene_print_info(struct scene scene);
 
 void scene_object_print_info(struct scene_object object);
-
-
-
 
 #endif

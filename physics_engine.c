@@ -20,8 +20,12 @@ static void set_pixel(char *matrix, int x, int y, char c, int resolution_x, int 
     matrix[y * resolution_x + x] = c;
 }
 
-int physics_is_valid(int id, char direction, const struct scene *scene, int res_x, int res_y)
+int physics_is_valid(int id, char direction, const struct scene *scene)
 {
+    int res_x = scene->res_x;
+    int res_y = scene->res_y;
+
+
     struct scene clone = *scene;
     struct scene_object *object = NULL;
 

@@ -1,32 +1,14 @@
-#include <stdio.h>
-#include "renderer.h"
-#include <unistd.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include "tetromino.h"
-#include <string.h>
-#include "physics_engine.h"
-#include "linked_list.h"
+#include "setup_stdio.h"
 #include <signal.h>
 #include <termios.h>
 #include "enes_util.h"
-#include "gameplay.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 static int terminal_descriptor = -1;
 static struct termios terminal_original;
 static struct termios terminal_settings;
-
-static void restore_screen(void)
-{
-    fprintf(stdout, ESCAPE "[?25h" ESCAPE "c");
-    fflush(stdout);
-}
-
-static void handle_sigint(int signal)
-{
-    restore_screen();
-    exit(0);
-}
 
 static void restore(void)
 {
@@ -36,7 +18,20 @@ static void restore(void)
     }
 }
 
-static void *setup_stdin()
+void restore_screen(void)
+{
+    fprintf(stdout, ESCAPE "[?25h" ESCAPE "c");
+    fflush(stdout);
+    restore();
+}
+
+static void handle_sigint(int signal)
+{
+    restore_screen();
+    exit(0);
+}
+
+void *setup_stdin(void)
 {
     if (terminal_descriptor != -1)
     {
@@ -112,49 +107,4 @@ static void *setup_stdin()
     fprintf(stdout, ESCAPE "[?25l");
     fflush(stdout);
     signal(SIGINT, handle_sigint);
-}
-
-int main(void)
-{
-    setup_stdin();
-    struct scene scene = scene_create();
-    struct renderer_parameters parameters;
-    parameters.resolution_x = 18;
-    parameters.resolution_y = 20;
-    parameters.scene = &scene;
-    parameters.work = &gameplay_rule;
-    scene.res_x = parameters.resolution_x;
-    scene.res_y = parameters.resolution_y;
-
-
-    struct scene_object ground = scene_create_object(1000, parameters.resolution_x, 2);
-    struct scene_object left_wall = scene_create_object(1001, 2, parameters.resolution_y - 2);
-    struct scene_object right_wall = scene_create_object(1002, 2, parameters.resolution_y - 2);
-    ground.y = parameters.resolution_y - 2;
-    right_wall.x = parameters.resolution_x - 2;
-    memset(ground.texture, '#', ground.width * ground.height);
-    memset(left_wall.texture, '#', left_wall.width * left_wall.height);
-    memset(right_wall.texture, '#', right_wall.width * right_wall.height);
-
-    scene_add_object(&scene, ground);
-    scene_add_object(&scene, left_wall);
-    scene_add_object(&scene, right_wall);
-
-    struct scene_object pile = scene_create_object(1003, parameters.resolution_x - 4, parameters.resolution_y - 4);
-    pile.x = 2;
-    pile.y = 2;
-    pile.color = 3;
-    scene_add_object(&scene, pile);
-
-    gameplay_spawn_tetromino(&scene);
-
-    pthread_t t1;
-    pthread_create(&t1, NULL, &renderer_start, &parameters);
-
-    pthread_t t2;
-    pthread_create(&t2, NULL, &gameplay_input, NULL);
-
-    pthread_join(t1, NULL);
-
-    return 0;
 }

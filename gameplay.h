@@ -5,7 +5,7 @@
 
 void *gameplay_input(void *p);
 
-void gameplay_rule(struct scene *scene, int res_x, int res_y);
+void gameplay_rule(struct scene *scene);
 
 void gameplay_spawn_tetromino(struct scene *scene);
 

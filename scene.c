@@ -64,6 +64,7 @@ struct scene_object scene_create_object(int id, int width, int height)
     object.y = 0;
     object.is_landed = 0;
     memset(object.texture, ' ', width * height);
+    object.is_text = 0;
 
     return object;
 }

@@ -10,7 +10,7 @@ struct renderer_parameters
     int resolution_y;
     struct scene *scene;
 
-    void (* work)(struct scene *scene, int res_x, int res_y);
+    void (* work)(struct scene *scene);
 };
 
 void *renderer_start(void *parameters);
