@@ -156,11 +156,6 @@ void *renderer_start(void *parameters)
         clear_matrix(matrix, resolution_x, resolution_y);
         // for each object in the scene draw matrix
         pthread_mutex_lock(&scene->mutex);
-        if (scene->game_over)
-        {
-            //printf("\n\nGame over: %d\n", scene->score);
-            //return NULL;
-        }
         for (int i = 0; i < scene->object_count; i++)
         {
             const struct scene_object object = scene->objects[i];

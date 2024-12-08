@@ -12,7 +12,6 @@ struct scene_object
     int x;
     int y;
     char texture[1000];
-    int is_landed;
     int rotation;
     char tetromino_type;
     int is_text;
@@ -24,10 +23,11 @@ struct scene
     int object_count;
     int score;
     pthread_mutex_t mutex;
-    int game_over;
     int res_x;
     int res_y;
     int chamber_width;
+    char nickname[50];
+    int is_paused;
 };
 
 struct scene scene_create(void);

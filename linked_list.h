@@ -34,7 +34,7 @@ void set(struct node *root, int i, int value);
 
 void insert(struct node **root, int i, int value);
 
-void delete_at(struct node **root, int i);
+int delete_at(struct node **root, int i);
 
 void delete_all(struct node **root, int value);
  

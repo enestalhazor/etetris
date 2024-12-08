@@ -29,7 +29,6 @@ void print_linked_list(const struct node *root)
         current = current->next;
     }
 
-    
     printf("]\n");
 }
 
@@ -37,7 +36,7 @@ void push(struct node **root, int value)
 {
     struct node *new_node = create_node(value);
 
-    if(*root == NULL)
+    if (*root == NULL)
     {
         *root = new_node;
         return;
@@ -72,10 +71,10 @@ int pop(struct node *root)
 
 int shift(struct node **root)
 {
-    if(*root == NULL)
+    if (*root == NULL)
     {
         return 0;
-    }  
+    }
     struct node *temp = (*root)->next;
     int p = (*root)->value;
     free(*root);
@@ -147,11 +146,11 @@ void insert(struct node **root, int i, int value)
     current->next = new_node;
 }
 
-void delete_at(struct node **root, int i)
+int delete_at(struct node **root, int i)
 {
     if (i == 0)
     {
-        shift(root);
+        return shift(root);
     }
 
     struct node *current = *root;
@@ -161,7 +160,12 @@ void delete_at(struct node **root, int i)
         current = current->next;
     }
 
+    struct node *deleted = current->next;
     current->next = current->next->next;
+    int deleted_num = deleted->value;
+    free(deleted);
+
+    return deleted_num;
 }
 
 void delete_all(struct node **root, int value)

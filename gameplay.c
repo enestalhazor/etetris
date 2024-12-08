@@ -5,6 +5,7 @@
 #include "physics_engine.h"
 #include <string.h>
 #include "linked_list.h"
+#include "setup_stdio.h"
 
 struct node *queue;
 pthread_mutex_t queue_mutex;
@@ -135,16 +136,19 @@ void gameplay_rule(struct scene *scene)
 
     struct scene_object *score = scene_get_object(scene, 1004);
     memset(score->texture, ' ', score->width * score->height);
-    sprintf(score->texture, "score: %d", scene->score);
+    sprintf(score->texture, "Score: %d", scene->score);
+
+    struct scene_object *nickname = scene_get_object(scene, 1008);
+    sprintf(nickname->texture, "Player: %s", scene->nickname);
 
     int speed = 10 - scene->score / 40;
 
-    if (gameplay_time % speed == 0)
+    if (gameplay_time % speed == 0 && !scene->is_paused)
     {
         for (int i = 0; i < scene->object_count; i++)
         {
             struct scene_object *obj = &scene->objects[i];
-            if (obj->id < 1000 && obj->is_landed == 0)
+            if (obj->id < 1000)
             {
                 if (physics_is_valid(obj->id, 'd', scene))
                 {
@@ -152,7 +156,6 @@ void gameplay_rule(struct scene *scene)
                 }
                 else
                 {
-                    obj->is_landed = 1;
                     struct scene_object *pile = scene_get_object(scene, 1003);
 
                     for (int h = 0; h < obj->height; h++)
@@ -164,7 +167,10 @@ void gameplay_rule(struct scene *scene)
                                 set_pixel(pile->texture, obj->x - 1 + w, obj->y - 1 + h, get_pixel(obj->texture, w, h, obj->width, obj->height), pile->width, pile->height);
                                 if ((obj->y - 1 + h) == 0)
                                 {
-                                    scene->game_over = 1;
+                                    FILE *f = fopen("score.txt", "a");
+                                    fprintf(f, "%s %d\n", scene->nickname, scene->score);
+                                    restore_screen();
+                                    exit(0);
                                 }
                             }
                         }
@@ -174,13 +180,6 @@ void gameplay_rule(struct scene *scene)
                     scene_remove_object(scene, obj->id);
                     gameplay_spawn_tetromino(scene);
 
-                    if (scene->game_over)
-                    {
-                        scene->score = 0;
-                        struct scene_object *pile = scene_get_object(scene, 1003);
-                        memset(pile->texture, ' ', pile->height * pile->width);
-                        scene->game_over = 0;
-                    }
                 }
             }
         }
@@ -241,8 +240,29 @@ void gameplay_rule(struct scene *scene)
             scene->score = 0;
             struct scene_object *pile = scene_get_object(scene, 1003);
             memset(pile->texture, ' ', pile->height * pile->width);
-            scene->game_over = 0;
 
+            break;
+
+        case 'p':
+        case 'P':
+
+            struct scene_object *pause = scene_get_object(scene, 1009);
+            if (scene->is_paused)
+            {
+                memset(pause->texture, ' ', pause->width * pause->height);
+                scene->is_paused = 0;
+            }
+            else
+            {
+                sprintf(pause->texture, "Game paused");
+                scene->is_paused = 1;
+            }
+            break;
+
+        case 'x':
+        case 'X':
+
+            scene->objects[flying_tetromino].y = 0;
             break;
         }
     }

@@ -9,9 +9,8 @@ struct scene scene_create(void)
     scene.object_count = 0;
     memset(scene.objects, 0, sizeof(struct scene_object) * 100);
     pthread_mutex_init(&scene.mutex, NULL);
-    scene.game_over = 0;
+    scene.is_paused = 0;
     return scene;
-    
 }
 
 void scene_add_object(struct scene *scene, struct scene_object object)
@@ -40,15 +39,14 @@ void scene_remove_object(struct scene *scene, int id)
 
 struct scene_object *scene_get_object(struct scene *scene, int id)
 {
-    for(int i = 0; i < scene->object_count; i++)
+    for (int i = 0; i < scene->object_count; i++)
     {
         struct scene_object o = scene->objects[i];
 
-        if(scene->objects[i].id == id)
+        if (scene->objects[i].id == id)
         {
             return &scene->objects[i];
         }
-        
     }
     return NULL;
 }
@@ -62,22 +60,19 @@ struct scene_object scene_create_object(int id, int width, int height)
     object.color = 0;
     object.x = 0;
     object.y = 0;
-    object.is_landed = 0;
     memset(object.texture, ' ', width * height);
     object.is_text = 0;
-
     return object;
 }
 
 void scene_print_info(struct scene scene)
 {
-     printf("\nscene (%d objects)\n", scene.object_count);
-    
+    printf("\nscene (%d objects)\n", scene.object_count);
+
     for (int i = 0; i < scene.object_count; i++)
     {
         scene_object_print_info(scene.objects[i]);
     }
-    
 }
 
 void scene_object_print_info(struct scene_object object)
@@ -87,4 +82,3 @@ void scene_object_print_info(struct scene_object object)
     printf("position = %d, %d\n", object.x, object.y);
     printf("color = %d\n", object.color);
 }
-
