@@ -7,7 +7,7 @@
 #include "linked_list.h"
 #include "setup_stdio.h"
 
-struct node *queue;
+struct linked_list queue;
 pthread_mutex_t queue_mutex;
 int gameplay_time = 0;
 
@@ -61,7 +61,7 @@ void *gameplay_input(void *p)
     {
         char c = fgetc(stdin);
         pthread_mutex_lock(&queue_mutex);
-        push(&queue, c);
+        list_push(&queue, c);
         pthread_mutex_unlock(&queue_mutex);
     }
 }
@@ -185,10 +185,10 @@ void gameplay_rule(struct scene *scene)
         }
     }
 
-    while (len(queue) != 0)
+    while (queue.size != 0)
     {
         pthread_mutex_lock(&queue_mutex);
-        int c = shift(&queue);
+        int c = list_shift(&queue);
         pthread_mutex_unlock(&queue_mutex);
         int flying_tetromino = -1;
 
