@@ -6,7 +6,13 @@
     linked list is a data structure.
 */
 
-struct node *create_node(int value)
+struct node
+{
+    int value;
+    struct node *next;
+};
+
+static struct node *create_node(int value)
 {
     struct node *p = (struct node *)malloc(sizeof(struct node));
 
@@ -16,10 +22,17 @@ struct node *create_node(int value)
     return p;
 }
 
-void print_linked_list(const struct node *root)
+void list_init(struct linked_list *list)
 {
-    const struct node *current = root;
-    printf("[");
+    list->head = NULL;
+    list->size = 0;
+}
+
+void list_print(const struct linked_list *list)
+{
+    const struct node *current = list->head;
+
+    printf("(%d)[", list->size);
 
     while (current != NULL)
     {
@@ -29,20 +42,21 @@ void print_linked_list(const struct node *root)
         current = current->next;
     }
 
-    printf("]\n");
+    printf("]\n\n");
 }
 
-void push(struct node **root, int value)
+void list_push(struct linked_list *list, int value)
 {
+    list->size++;
     struct node *new_node = create_node(value);
 
-    if (*root == NULL)
+    if (list->head == NULL)
     {
-        *root = new_node;
+        list->head = new_node;
         return;
     }
 
-    struct node *current = *root;
+    struct node *current = list->head;
 
     while (current->next != NULL)
     {
@@ -51,9 +65,9 @@ void push(struct node **root, int value)
     current->next = new_node;
 }
 
-int pop(struct node *root)
+int list_pop(struct linked_list *list)
 {
-    struct node *current = root;
+    struct node *current = list->head;
 
     while (current->next->next != NULL)
     {
@@ -64,49 +78,38 @@ int pop(struct node *root)
             int temp = current->next->value;
             free(current->next);
             current->next = NULL;
+            list->size--;
             return temp;
         }
     }
 }
 
-int shift(struct node **root)
+int list_shift(struct linked_list *list)
 {
-    if (*root == NULL)
+    if (list->head == NULL)
     {
         return 0;
     }
-    struct node *temp = (*root)->next;
-    int p = (*root)->value;
-    free(*root);
-    *root = temp;
+    struct node *temp = list->head->next;
+    int p = list->head->value;
+    free(list->head);
+    list->head = temp;
+    list->size--;
 
     return p;
 }
 
-void unshift(struct node **root, int value)
+void list_unshift(struct linked_list *list, int value)
 {
+    list->size++;
     struct node *new_node = create_node(value);
-    new_node->next = *root;
-    *root = new_node;
+    new_node->next = list->head;
+    list->head = new_node;
 }
 
-int len(struct node *root)
+int list_get(const struct linked_list *list, int i)
 {
-    struct node *current = root;
-    int i = 0;
-
-    while (current != NULL)
-    {
-        current = current->next;
-        i++;
-    }
-
-    return i;
-}
-
-int get(struct node *root, int i)
-{
-    struct node *current = root;
+    struct node *current = list->head;
     for (int j = 0; j < i; j++)
     {
         current = current->next;
@@ -115,9 +118,9 @@ int get(struct node *root, int i)
     return current->value;
 }
 
-void set(struct node *root, int i, int value)
+void list_set(struct linked_list *list, int i, int value)
 {
-    struct node *current = root;
+    struct node *current = list->head;
 
     for (int j = 0; j < i; j++)
     {
@@ -126,15 +129,17 @@ void set(struct node *root, int i, int value)
     current->value = value;
 }
 
-void insert(struct node **root, int i, int value)
+void list_insert(struct linked_list *list, int i, int value)
 {
     if (i == 0)
     {
-        unshift(root, value);
+        list_unshift(list, value);
         return;
     }
 
-    struct node *current = *root;
+    list->size++;
+
+    struct node *current = list->head;
     struct node *new_node = create_node(value);
 
     for (int j = 1; j < i; j++)
@@ -146,14 +151,15 @@ void insert(struct node **root, int i, int value)
     current->next = new_node;
 }
 
-int delete_at(struct node **root, int i)
+int list_delete_at(struct linked_list *list, int i)
 {
     if (i == 0)
     {
-        return shift(root);
+        return list_shift(list);
     }
 
-    struct node *current = *root;
+    list->size--;
+    struct node *current = list->head;
 
     for (int j = 1; j < i; j++)
     {
@@ -168,19 +174,74 @@ int delete_at(struct node **root, int i)
     return deleted_num;
 }
 
-void delete_all(struct node **root, int value)
+void list_delete_all(struct linked_list *list, int value)
 {
-    struct node *current = *root;
+    struct node *current = list->head;
     int i = 0;
 
     while (current != NULL)
     {
         if (current->value == value)
         {
-            delete_at(root, i);
+            list_delete_at(list, i);
             i--;
         }
         current = current->next;
         i++;
     }
+}
+
+void list_sort(struct linked_list *list)
+{
+    if (list->head == NULL)
+    {
+        return;
+    }
+
+    int i = 0;
+    struct node *current = list->head;
+
+    while (current->next != NULL)
+    {
+        struct linked_list right_list;
+        right_list.head = current->next;
+        int max_i = list_max(&right_list);
+
+        if (current->value < list_get(&right_list, max_i))
+        {
+            int temp = current->value;
+            current->value = list_get(&right_list, max_i);
+            list_set(&right_list, max_i, temp);
+        }
+
+        current = current->next;
+        i++;
+    }
+}
+
+int list_max(const struct linked_list *list)
+{
+    if (list->head == NULL)
+    {
+        return -1;
+    }
+
+    const struct node *current = list->head;
+    int max = current->value;
+    int i = 0;
+    int max_i = 0;
+
+    while (current != NULL)
+    {
+        if (max < current->value)
+        {
+            max = current->value;
+            max_i = i;
+        }
+
+        current = current->next;
+        i++;
+    }
+
+    return max_i;
 }

@@ -3,39 +3,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 /*
     linked list is a data structure.
 */
 
-struct node
+struct linked_list
 {
-    int value;
-    struct node *next;
+    struct node *head;
+    int size;
 };
 
-struct node *create_node(int value);
+void list_init(struct linked_list *list);
+void list_print(const struct linked_list *list);
+void list_push(struct linked_list *list, int value);
+int list_pop(struct linked_list *list);
+int list_shift(struct linked_list *list);
+void list_unshift(struct linked_list *list, int value);
+int list_get(const struct linked_list *list, int i);
+void list_set(struct linked_list *list, int i, int value);
+void list_insert(struct linked_list *list, int i, int value);
+int list_delete_at(struct linked_list *list, int i);
+void list_delete_all(struct linked_list *list, int value);
+void list_sort(struct linked_list *list);
+int list_max(const struct linked_list *list);
 
-void print_linked_list(const struct node *root);
-
-void push(struct node **root, int value);
-
-int pop(struct node *root);
-
-int shift(struct node **root);
-
-void unshift(struct node **root, int value);
-
-int len(struct node *root);
-
-int get(struct node *root, int i);
-
-void set(struct node *root, int i, int value);
-
-void insert(struct node **root, int i, int value);
-
-int delete_at(struct node **root, int i);
-
-void delete_all(struct node **root, int value);
- 
 #endif
