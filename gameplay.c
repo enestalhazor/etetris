@@ -179,7 +179,6 @@ void gameplay_rule(struct scene *scene)
                     scene->score = scene->score + check_score(scene, res_x, res_y);
                     scene_remove_object(scene, obj->id);
                     gameplay_spawn_tetromino(scene);
-
                 }
             }
         }
@@ -200,70 +199,72 @@ void gameplay_rule(struct scene *scene)
             }
         }
 
-        switch (c)
+        if (!scene->is_paused)
         {
-        case 'a':
-        case 'A':
-            if (physics_is_valid(scene->objects[flying_tetromino].id, 'l', scene))
+
+            switch (c)
             {
-                scene->objects[flying_tetromino].x--;
-            }
-            break;
+            case 'a':
+            case 'A':
+                if (physics_is_valid(scene->objects[flying_tetromino].id, 'l', scene))
+                {
+                    scene->objects[flying_tetromino].x--;
+                }
+                break;
 
-        case 'd':
-        case 'D':
-            if (physics_is_valid(scene->objects[flying_tetromino].id, 'r', scene))
-            {
-                scene->objects[flying_tetromino].x++;
-            }
-            break;
+            case 'd':
+            case 'D':
+                if (physics_is_valid(scene->objects[flying_tetromino].id, 'r', scene))
+                {
+                    scene->objects[flying_tetromino].x++;
+                }
+                break;
 
-        case 'w':
-        case 'W':
-            if (physics_is_valid(scene->objects[flying_tetromino].id, 'o', scene))
-            {
-                tetromino_rotate(&scene->objects[flying_tetromino]);
-            }
+            case 'w':
+            case 'W':
+                if (physics_is_valid(scene->objects[flying_tetromino].id, 'o', scene))
+                {
+                    tetromino_rotate(&scene->objects[flying_tetromino]);
+                }
 
-            break;
+                break;
 
-        case 's':
-        case 'S':
-            if (physics_is_valid(scene->objects[flying_tetromino].id, 'd', scene))
-            {
-                scene->objects[flying_tetromino].y++;
-            }
-            break;
+            case 's':
+            case 'S':
+                if (physics_is_valid(scene->objects[flying_tetromino].id, 'd', scene))
+                {
+                    scene->objects[flying_tetromino].y++;
+                }
+                break;
 
-        case 'r':
-        case 'R':
-            scene->score = 0;
-            struct scene_object *pile = scene_get_object(scene, 1003);
-            memset(pile->texture, ' ', pile->height * pile->width);
+            case 'r':
+            case 'R':
+                scene->score = 0;
+                struct scene_object *pile = scene_get_object(scene, 1003);
+                memset(pile->texture, ' ', pile->height * pile->width);
 
-            break;
+                break;
 
-        case 'p':
-        case 'P':
+            case 'p':
+            case 'P':
 
-            struct scene_object *pause = scene_get_object(scene, 1009);
-            if (scene->is_paused)
-            {
-                memset(pause->texture, ' ', pause->width * pause->height);
-                scene->is_paused = 0;
-            }
-            else
-            {
+                struct scene_object *pause = scene_get_object(scene, 1009);
                 sprintf(pause->texture, "Game paused");
                 scene->is_paused = 1;
+                break;
+
+            case 'x':
+            case 'X':
+
+                scene->objects[flying_tetromino].y = 0;
+                break;
             }
-            break;
-
-        case 'x':
-        case 'X':
-
-            scene->objects[flying_tetromino].y = 0;
-            break;
+        }
+        else if (c == 'p' || c == 'P')
+        {
+            struct scene_object *pause = scene_get_object(scene, 1009);
+            memset(pause->texture, ' ', pause->width * pause->height);
+            scene->is_paused = 0;
         }
     }
 
