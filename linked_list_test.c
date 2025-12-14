@@ -6,14 +6,22 @@ int main()
 {
     struct linked_list list;
     list_init(&list);
-    for (int i = 0; i < 100; i++)
+    list_push(&list, 5);
+    list_push(&list, 10);
+    list_push(&list, 20);
+    list_push(&list, 55);
+    list_push(&list, 11);
+
+    
+    list_print(&list);
+    int index = list_find(&list, 5);
+
+    if(index != -1)
     {
-        list_push(&list, get_random_number(0, 200));
+        printf("found: %d. index\n", index);
     }
-    list_sort(&list);
-    list_print(&list);
-    list_shift(&list);
-    list_print(&list);
-
-
+    else
+    {
+        printf("not found\n");
+    }
 }

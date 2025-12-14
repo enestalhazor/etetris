@@ -219,6 +219,31 @@ void list_sort(struct linked_list *list)
     }
 }
 
+int list_find(const struct linked_list *list, int value)
+{
+    if(list->head == NULL)
+    {
+        return -1;
+    }
+
+    int q = 0;
+    struct node *find = list->head;
+
+    while(find != NULL)
+    {
+        if(find->value == value)
+        {
+            return q;
+        }
+
+        find = find->next;
+        q++;
+    }
+
+    return -1;
+}
+
+
 int list_max(const struct linked_list *list)
 {
     if (list->head == NULL)

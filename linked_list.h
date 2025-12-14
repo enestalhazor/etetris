@@ -26,5 +26,6 @@ int list_delete_at(struct linked_list *list, int i);
 void list_delete_all(struct linked_list *list, int value);
 void list_sort(struct linked_list *list);
 int list_max(const struct linked_list *list);
+int list_find(const struct linked_list *list, int value);
 
 #endif
