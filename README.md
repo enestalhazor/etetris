@@ -58,6 +58,9 @@ Start the game with:
 - X     : Reset piece position  
 - Ctrl+C: Exit safely
 
+# Etetris on terminal 
+![Demo screenshot](etetris.jpeg)
+
 ---
 
 ##  Modules Overview
