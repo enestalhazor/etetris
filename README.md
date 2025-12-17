@@ -13,21 +13,12 @@
 
 ---
 
-### Install GCC (if not installed)
-
-**Ubuntu**
-```bash
-sudo apt update
-```
-
----
-
 ## Compile
 
 Run this command in the project directory:
 
 ```bash
-gcc etetris.c gameplay.c renderer.c scene.c tetromino.c physics_engine.c linked_list.c setup_stdio.c enes_util.c -pthread
+gcc etetris.c gameplay.c renderer.c scene.c tetromino.c physics_engine.c linked_list.c setup_stdio.c enes_util.c
 ```
 
 After compilation, this file will be created:
@@ -117,7 +108,6 @@ Start the game with:
 - Random number generation
 - String utilities
 - Terminal helper functions
-- Race animation utility
 
 ---
 
@@ -147,9 +137,5 @@ Start the game with:
 
 - score.txt  
   Stores player nickname and score when the game ends
-
-## Output Files
-
-- `score.txt` is created when the game ends
 
 ---

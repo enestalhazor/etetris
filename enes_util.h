@@ -53,8 +53,6 @@ void replace_all(char *main, const char *target, const char *replacement);
 
 int replace(char *main, const char *target, const char *replacement);
 
-int perform_race(int racer_count);
-
 void print_spaces(int count);
 
 
