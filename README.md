@@ -1,4 +1,6 @@
-# INSTALL.md
+# Etetris
+
+Multithreaded terminal Tetris game.
 
 ## Etetris Installation
 
